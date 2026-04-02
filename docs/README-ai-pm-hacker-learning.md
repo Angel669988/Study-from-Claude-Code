@@ -50,4 +50,7 @@
 ## 文件入口
 
 - 学习页面：`docs/ai-pm-hacker-learning-claude-code-v1.0.html`
-
+- 任务清单：`docs/LEARNING-TASKLIST-ai-pm.md`
+- 第一课讲义：`docs/01-harness-engineering-lesson-1.md`
+- Day1 基线包：`docs/01-harness-day1-baseline-kit.md`
+- 基线表模板：`docs/templates/day1-baseline-template.csv`
