@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI PM 黑客学习 Claude Code v1.0</title>
+  <style>
+    :root {
+      --bg: #f5efe4;
+      --card: #fffdf8;
+      --ink: #243447;
+      --sub: #516173;
+      --shadow: 0 12px 30px rgba(36, 52, 71, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: radial-gradient(circle at 12% 10%, #fff8e8 0%, var(--bg) 52%, #eee4d3 100%);
+      font-family: "SF Pro SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      line-height: 1.6;
+    }
+    .deck {
+      max-width: 1320px;
+      margin: 24px auto 60px;
+      padding: 0 18px;
+      display: grid;
+      gap: 18px;
+    }
+    .slide {
+      background: var(--card);
+      border: 1px solid #efe4d3;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+    }
+    h1, h2, h3 { margin: 0 0 10px; }
+    h1 { font-size: 32px; }
+    h2 { font-size: 22px; }
+    .plain-summary {
+      margin: 8px 0 14px;
+      border: 1px solid #d8e8f9;
+      background: #eef6ff;
+      color: #2c4f74;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-size: 14px;
+    }
+    .toc-nav { display: grid; gap: 8px; margin-top: 10px; }
+    .toc-link {
+      display: block;
+      text-decoration: none;
+      font-size: 15px;
+      color: #2e4f73;
+      border: 1px solid #cddff5;
+      background: #edf5ff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      transition: all 0.2s ease;
+    }
+    .toc-link:hover { background: #e4f0fe; border-color: #bcd4f2; transform: translateY(-1px); }
+    .toc-link-sub {
+      margin-left: 20px;
+      font-size: 14px;
+      background: #f4f9ff;
+      border-color: #d9e8fa;
+      color: #3a5d82;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .notes {
+      background: #fcf7ee;
+      border: 1px solid #eee0c7;
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .notes h3 { font-size: 16px; margin-bottom: 6px; }
+    .notes ul { margin: 0; padding-left: 18px; font-size: 14px; color: #365066; }
+    .notes li { margin: 6px 0; }
+    .source { margin-top: 10px; font-size: 13px; color: #55697c; }
+    .source code { background: #f3efe7; border-radius: 6px; padding: 2px 6px; }
+    .module-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-top: 12px;
+    }
+    .module-card {
+      border: 1px solid #d7e2f0;
+      background: linear-gradient(180deg, #f7faff 0%, #f2f7fd 100%);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88), 0 2px 0 #e4ecf7, 0 10px 24px rgba(36, 52, 71, 0.06);
+    }
+    .module-card h3 { font-size: 18px; margin-bottom: 8px; color: #2b4d73; }
+    .module-card h4 { font-size: 14px; margin: 10px 0 6px; color: #3a5a7d; }
+    .module-card ul { margin: 0; padding-left: 18px; color: #415a73; font-size: 14px; }
+    .module-card li { margin: 5px 0; }
+    .module-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+    .module-main {
+      border: 1px solid #cfe6d6;
+      background: #f3fbf6;
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.86), 0 2px 0 #dcefe2;
+    }
+    .module-side {
+      border: 1px solid #ebdcc0;
+      background: #fffaf0;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 2px 0 #f1e4c9;
+    }
+    .flow-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 8px 0 10px;
+    }
+    .arch-node {
+      border: 1px solid #cfe0f5;
+      background: #eef5ff;
+      color: #32587f;
+      border-radius: 10px;
+      padding: 6px 9px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .arch-arrow { color: #6f87a3; font-size: 14px; font-weight: 700; }
+    .kpi {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .kpi div {
+      border: 1px solid #dfecf9;
+      background: #f3f8ff;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 13px;
+      color: #2d5279;
+    }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: auto;
+      padding-top: 12px;
+    }
+    .tag {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid #d5e5f8;
+      background: #f0f7ff;
+      color: #385a7f;
+    }
+    .small-note {
+      margin-top: 8px;
+      color: #55697c;
+      font-size: 13px;
+    }
+    .hero-header {
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .hero-left {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .author-line {
+      margin-top: 6px;
+      margin-bottom: 4px;
+      color: #6f5630;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .mini-flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      margin: 6px 0 10px;
+    }
+    .mini-node {
+      border: 1px solid #bfd8f2;
+      background: #e9f3ff;
+      color: #305b86;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .mini-arrow {
+      color: #6f8dab;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .example-box {
+      margin-top: 8px;
+      border: 1px solid #d8e8fb;
+      background: #f5faff;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 13px;
+      color: #3a5775;
+    }
+    .example-box strong { color: #2f547d; }
+    @media (max-width: 1024px) {
+      .hero-header { flex-direction: column; }
+      .two-col, .module-split { grid-template-columns: 1fr; }
+      .kpi { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <section class="slide">
+      <div class="hero-header">
+        <div class="hero-left">
+          <h1>AI 大模型产品经理黑客学习版 v1.0</h1>
+          <div class="author-line">作者：十月</div>
+        </div>
+      </div>
+      <div class="plain-summary">主题：不是“看懂代码”，而是“把 Claude Code 源码变成产品决策系统”：知道学什么、如何学、能用在哪、怎么验收业务价值。</div>
+      <div class="toc-nav">
+        <a class="toc-link" href="#part-1-why">1. 为什么 AI PM 要黑客级学习 Claude Code</a>
+        <a class="toc-link" href="#part-2-map">2. 学习地图：从产品问题倒推源码</a>
+        <a class="toc-link toc-link-sub" href="#part-2-1">2.1 主链路：输入->迭代->执行->治理->沉淀</a>
+        <a class="toc-link toc-link-sub" href="#part-2-2">2.2 目标函数：成功率/效率/风险/成本</a>
+        <a class="toc-link" href="#part-3-capabilities">3. 七大可学能力：你能学到什么</a>
+        <a class="toc-link toc-link-sub" href="#part-3-1">3.1 Prompt 上下文工程</a>
+        <a class="toc-link toc-link-sub" href="#part-3-2">3.2 Runtime 迭代闭环</a>
+        <a class="toc-link toc-link-sub" href="#part-3-3">3.3 Tool 路由与执行</a>
+        <a class="toc-link toc-link-sub" href="#part-3-4">3.4 Permission/Hook 治理</a>
+        <a class="toc-link toc-link-sub" href="#part-3-5">3.5 Memory 与指令继承</a>
+        <a class="toc-link toc-link-sub" href="#part-3-6">3.6 Cost/Compaction 成本控制</a>
+        <a class="toc-link toc-link-sub" href="#part-3-7">3.7 Harness/Parity 外环演进</a>
+        <a class="toc-link" href="#part-4-playbook">4. 怎么用：AI PM 业务落地 Playbook</a>
+        <a class="toc-link" href="#part-5-lab">5. 实战 Lab：真实 Query 与改写策略</a>
+      </div>
+      <div class="source">
+        源码基座：<code>rust/crates/rusty-claude-cli/src/main.rs</code>、<code>rust/crates/runtime/src/conversation.rs</code>、<code>rust/crates/runtime/src/prompt.rs</code>、<code>rust/crates/runtime/src/permissions.rs</code>、<code>rust/crates/runtime/src/hooks.rs</code>、<code>rust/crates/runtime/src/usage.rs</code>、<code>rust/crates/runtime/src/compact.rs</code>、<code>rust/crates/compat-harness/src/lib.rs</code>、<code>src/parity_audit.py</code>
+      </div>
+    </section>
+
+    <section class="slide" id="part-1-why">
+      <h2>1. 为什么 AI PM 要黑客级学习 Claude Code</h2>
+      <div class="two-col">
+        <div class="notes">
+          <h3>你真正会获得什么</h3>
+          <ul>
+            <li>把“体验问题”拆成可归因的系统问题：Prompt、Runtime、Tools、Governance、Cost 哪层出问题一眼可判。</li>
+            <li>把“优化想法”转成可实验杠杆：一次只改一层，效果可验证。</li>
+            <li>把“版本迭代”变成外环系统：每周有差距表、有优先级、有回归验收。</li>
+          </ul>
+          <h3 style="margin-top:12px;">不学会发生什么</h3>
+          <ul>
+            <li>只能凭直觉调 Prompt，无法解释为什么成功率波动。</li>
+            <li>“提升”不可复现，团队争论大于决策。</li>
+            <li>需求越多，系统熵越高，成本和风险一起上升。</li>
+          </ul>
+        </div>
+        <div class="notes">
+          <h3>AI PM 黑客级学习心法</h3>
+          <ul>
+            <li>看源码不是为了写 Rust，而是为了拿到“决策杠杆图”。</li>
+            <li>每读一层都回答三个问题：这层解决什么业务问题？能调什么？如何验收？</li>
+            <li>一切结论必须回到指标：一次完成率、回合数、误拦截率、成本。</li>
+          </ul>
+          <h3 style="margin-top:12px;">一句话</h3>
+          <ul>
+            <li>Claude Code 对 PM 的价值：它把“Agent 产品”从玄学调参，变成可运营工程。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="part-2-map">
+      <h2>2. 学习地图：从产品问题倒推源码</h2>
+      <div class="plain-summary">方法：先定义目标函数，再看源码层杠杆，最后做实验闭环。</div>
+      <div class="module-card" id="part-2-1">
+        <h3>2.1 主链路：输入 -> 迭代 -> 执行 -> 治理 -> 沉淀</h3>
+        <div class="flow-line">
+          <span class="arch-node">CLI 入口分流</span><span class="arch-arrow">-></span>
+          <span class="arch-node">Prompt 组装上下文</span><span class="arch-arrow">-></span>
+          <span class="arch-node">run_turn 循环</span><span class="arch-arrow">-></span>
+          <span class="arch-node">工具执行</span><span class="arch-arrow">-></span>
+          <span class="arch-node">Permission/Hook 闸门</span><span class="arch-arrow">-></span>
+          <span class="arch-node">Usage/Session 沉淀</span>
+        </div>
+        <div class="small-note">对应源码：<code>main.rs</code> + <code>prompt.rs</code> + <code>conversation.rs</code> + <code>tools/lib.rs</code> + <code>permissions.rs/hooks.rs</code> + <code>usage.rs/session.rs</code></div>
+      </div>
+      <div class="module-card" id="part-2-2" style="margin-top:12px;">
+        <h3>2.2 目标函数：你作为 PM 要赢什么</h3>
+        <div class="kpi">
+          <div><strong>成功率</strong><br/>一次完成率（无需二次追问）</div>
+          <div><strong>效率</strong><br/>平均回合数 / 工具调用数</div>
+          <div><strong>风险</strong><br/>高风险工具误放行率</div>
+          <div><strong>成本</strong><br/>单任务 token 成本</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="part-3-capabilities">
+      <h2>3. 七大可学能力：你能学到什么</h2>
+      <div class="module-grid">
+        <article class="module-card" id="part-3-1">
+          <h3>3.1 Prompt 上下文工程</h3>
+          <div class="module-split">
+            <div class="module-main">
+              <h4>🛠️ 源码事实</h4>
+              <ul>
+                <li>分层构建 system prompt：系统规则、执行准则、环境上下文、项目上下文、CLAUDE 指令、运行配置。</li>
+                <li>自动发现并注入 <code>CLAUDE.md/.claude/instructions.md</code>，并做去重+预算截断。</li>
+              </ul>
+              <h4>你能学到</h4>
+              <ul>
+                <li>如何把“产品策略”从口头要求变成可执行上下文。</li>
+              </ul>
+              <h4>图形化说明</h4>
+              <div class="mini-flow">
+                <span class="mini-node">系统规则</span><span class="mini-arrow">-></span>
+                <span class="mini-node">项目指令</span><span class="mini-arrow">-></span>
+                <span class="mini-node">去重/预算</span><span class="mini-arrow">-></span>
+                <span class="mini-node">最终 Prompt</span>
+              </div>
+              <div class="example-box"><strong>例子：</strong>你要做“中文 query 命中优化”，把“改写只允许追加，不覆盖原句”写入项目指令后，模型输出更稳定，减少策略漂移。</div>
+              <div class="tag-row"><span class="tag">上下文工程</span><span class="tag">策略注入</span></div>
+            </div>
+            <aside class="module-side">
+              <h4>📈 PM 可用法</h4>
+              <ul>
+                <li>把关键业务规则写成项目指令文件，而非放在会议纪要里。</li>
+                <li>做 Prompt 变更灰度：只改一段，观测一次完成率变化。</li>
+              </ul>
+              <div class="example-box"><strong>验收：</strong>A/B 比较“改前 vs 改后”30 条 query，一次完成率上升且平均回合数不升。</div>
+            </aside>
+          </div>
+        </article>
+
+        <article class="module-card" id="part-3-2">
+          <h3>3.2 Runtime 迭代闭环</h3>
+          <div class="module-split">
+            <div class="module-main">
+              <h4>🛠️ 源码事实</h4>
+              <ul>
+                <li><code>run_turn</code> 是循环系统：模型输出 tool_use -> 执行 -> 回流 -> 再决策 -> 收敛。</li>
+                <li>内置停机条件、最大迭代、自动压缩阈值与累计 usage。</li>
+              </ul>
+              <h4>你能学到</h4>
+              <ul><li>如何设计“可持续交付”而非“一次性回答”的 Agent 产品。</li></ul>
+              <h4>图形化说明</h4>
+              <div class="mini-flow">
+                <span class="mini-node">用户问题</span><span class="mini-arrow">-></span>
+                <span class="mini-node">模型决策</span><span class="mini-arrow">-></span>
+                <span class="mini-node">工具执行</span><span class="mini-arrow">-></span>
+                <span class="mini-node">结果回流</span><span class="mini-arrow">-></span>
+                <span class="mini-node">停机输出</span>
+              </div>
+              <div class="example-box"><strong>例子：</strong>“帮我修 bug”通常要先读日志再改代码，run_turn 允许多轮工具调用并在条件满足时收敛，而不是第一轮硬答。</div>
+              <div class="tag-row"><span class="tag">迭代系统</span><span class="tag">收敛策略</span></div>
+            </div>
+            <aside class="module-side">
+              <h4>📈 PM 可用法</h4>
+              <ul>
+                <li>重点追“平均回合数”和“失败后恢复率”，这是一次完成率的前置指标。</li>
+              </ul>
+              <div class="example-box"><strong>验收：</strong>看“失败后恢复率”是否提升，避免把失败从第 1 轮推迟到第 3 轮。</div>
+            </aside>
+          </div>
+        </article>
+
+        <article class="module-card" id="part-3-3">
+          <h3>3.3 Tool 路由与执行</h3>
+          <div class="module-split">
+            <div class="module-main">
+              <h4>🛠️ 源码事实</h4>
+              <ul>
+                <li>工具面有注册清单、输入 schema、权限要求、统一执行入口。</li>
+                <li>CLI 入口可做 allowed_tools 规范化与白名单限制。</li>
+              </ul>
+              <h4>你能学到</h4>
+              <ul><li>如何把能力扩展做成“注册式平台”，避免主链路被污染。</li></ul>
+              <h4>图形化说明</h4>
+              <div class="mini-flow">
+                <span class="mini-node">工具注册</span><span class="mini-arrow">-></span>
+                <span class="mini-node">schema 校验</span><span class="mini-arrow">-></span>
+                <span class="mini-node">权限检查</span><span class="mini-arrow">-></span>
+                <span class="mini-node">执行路由</span>
+              </div>
+              <div class="example-box"><strong>例子：</strong>“查文件+改代码”会拆成读文件工具与写入工具，命中正确工具链才可能一次完成。</div>
+              <div class="tag-row"><span class="tag">工具平台</span><span class="tag">路由质量</span></div>
+            </div>
+            <aside class="module-side">
+              <h4>📈 PM 可用法</h4>
+              <ul>
+                <li>把“命中正确工具”作为中间指标，驱动 rewrite/路由优化。</li>
+              </ul>
+              <div class="example-box"><strong>验收：</strong>先看“首轮工具命中率”，再看最终一次完成率，定位问题更快。</div>
+            </aside>
+          </div>
+        </article>
+
+        <article class="module-card" id="part-3-4">
+          <h3>3.4 Permission/Hook 治理</h3>
+          <div class="module-split">
+            <div class="module-main">
+              <h4>🛠️ 源码事实</h4>
+              <ul>
+                <li>权限模式+升级审批路径是独立策略层。</li>
+                <li>Pre/Post Hook 在工具前后可拦截、反馈并改变后续决策。</li>
+              </ul>
+              <h4>你能学到</h4>
+              <ul><li>如何把“合规风控”嵌入执行闭环而不是事后补救。</li></ul>
+              <h4>图形化说明</h4>
+              <div class="mini-flow">
+                <span class="mini-node">模型提议动作</span><span class="mini-arrow">-></span>
+                <span class="mini-node">Permission 判定</span><span class="mini-arrow">-></span>
+                <span class="mini-node">Pre Hook 拦截</span><span class="mini-arrow">-></span>
+                <span class="mini-node">执行/拒绝</span><span class="mini-arrow">-></span>
+                <span class="mini-node">Post Hook 记录</span>
+              </div>
+              <div class="example-box"><strong>例子：</strong>高风险命令默认拦截并要求确认，系统会把拒绝信息回给模型，触发更安全的替代方案。</div>
+              <div class="tag-row"><span class="tag">风险控制</span><span class="tag">可审计</span></div>
+            </div>
+            <aside class="module-side">
+              <h4>📈 PM 可用法</h4>
+              <ul>
+                <li>主指标提升必须挂 3 个护栏：误拦截率、误放行率、时延。</li>
+              </ul>
+              <div class="example-box"><strong>验收：</strong>看“危险动作被拦住”同时“正常任务不被误伤”，而不是只看拦截数量。</div>
+            </aside>
+          </div>
+        </article>
+
+        <article class="module-card" id="part-3-5">
+          <h3>3.5 Memory 与指令继承</h3>
+          <div class="module-split">
+            <div class="module-main">
+              <h4>🛠️ 源码事实</h4>
+              <ul>
+                <li>项目记忆来自指令文件层级发现与注入，不是黑盒向量库。</li>
+                <li>存在可查看路径（如 memory 报告）来解释“为什么这么做”。</li>
+              </ul>
+              <h4>你能学到</h4>
+              <ul><li>如何把团队经验“资产化”，降低新人冷启动成本。</li></ul>
+              <h4>图形化说明</h4>
+              <div class="mini-flow">
+                <span class="mini-node">组织规范</span><span class="mini-arrow">-></span>
+                <span class="mini-node">项目指令文件</span><span class="mini-arrow">-></span>
+                <span class="mini-node">会话注入</span><span class="mini-arrow">-></span>
+                <span class="mini-node">输出一致</span>
+              </div>
+              <div class="example-box"><strong>例子：</strong>把“先给结论再给步骤”的答复规范写入记忆层，团队不同成员跑出的文档风格更一致。</div>
+              <div class="tag-row"><span class="tag">组织记忆</span><span class="tag">一致性</span></div>
+            </div>
+            <aside class="module-side">
+              <h4>📈 PM 可用法</h4>
+              <ul><li>建立“规则更新 -> 回归测试 -> 指标验证”的记忆治理流程。</li></ul>
+              <div class="example-box"><strong>验收：</strong>抽样比较“新成员任务”与“老成员任务”的成功率差距是否收敛。</div>
+            </aside>
+          </div>
+        </article>
+
+        <article class="module-card" id="part-3-6">
+          <h3>3.6 Cost/Compaction 成本控制</h3>
+          <div class="module-split">
+            <div class="module-main">
+              <h4>🛠️ 源码事实</h4>
+              <ul>
+                <li>usage 持续追踪输入/输出/cache token 与成本估算。</li>
+                <li>上下文过长触发自动压缩，保留近期关键消息继续执行。</li>
+              </ul>
+              <h4>你能学到</h4>
+              <ul><li>如何把成本控制嵌入运行时，而不是财务月末复盘。</li></ul>
+              <h4>图形化说明</h4>
+              <div class="mini-flow">
+                <span class="mini-node">usage 计量</span><span class="mini-arrow">-></span>
+                <span class="mini-node">接近阈值</span><span class="mini-arrow">-></span>
+                <span class="mini-node">自动压缩</span><span class="mini-arrow">-></span>
+                <span class="mini-node">继续任务</span>
+              </div>
+              <div class="example-box"><strong>例子：</strong>长对话任务中，系统在接近 token 上限时自动 compact，避免中途崩掉重来。</div>
+              <div class="tag-row"><span class="tag">成本治理</span><span class="tag">长会话</span></div>
+            </div>
+            <aside class="module-side">
+              <h4>📈 PM 可用法</h4>
+              <ul><li>一次完成率优化必须同步看单任务成本，避免“贵成功”。</li></ul>
+              <div class="example-box"><strong>验收：</strong>压缩后任务成功率不降，同时单任务成本下降或持平。</div>
+            </aside>
+          </div>
+        </article>
+
+        <article class="module-card" id="part-3-7">
+          <h3>3.7 Harness/Parity 外环演进</h3>
+          <div class="module-split">
+            <div class="module-main">
+              <h4>🛠️ 源码事实</h4>
+              <ul>
+                <li>兼容层可抽取上游 commands/tools/bootstrap 快照。</li>
+                <li>parity audit 输出已实现/缺失覆盖比，支持版本化补齐。</li>
+              </ul>
+              <h4>你能学到</h4>
+              <ul><li>如何把“追上游能力”从人肉对比升级为可重复审计流程。</li></ul>
+              <h4>图形化说明</h4>
+              <div class="mini-flow">
+                <span class="mini-node">上游快照</span><span class="mini-arrow">-></span>
+                <span class="mini-node">能力映射</span><span class="mini-arrow">-></span>
+                <span class="mini-node">parity 审计</span><span class="mini-arrow">-></span>
+                <span class="mini-node">Top3 补齐</span>
+              </div>
+              <div class="example-box"><strong>例子：</strong>每周看“已实现/缺失/部分实现”比例，只把 Top3 高业务价值差距排进下个版本。</div>
+              <div class="tag-row"><span class="tag">外环进化</span><span class="tag">能力对齐</span></div>
+            </div>
+            <aside class="module-side">
+              <h4>📈 PM 可用法</h4>
+              <ul><li>每周固定跑一次差距审计，只放 Top3 差距进下版本。</li></ul>
+              <div class="example-box"><strong>验收：</strong>版本复盘必须回答“这次补齐是否推动主指标”。</div>
+            </aside>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide" id="part-4-playbook">
+      <h2>4. 怎么用：AI PM 业务落地 Playbook</h2>
+      <div class="plain-summary">场景：把“一次完成率”设为主目标，结合 Claude Code 源码基座，做可归因增长。</div>
+      <div class="two-col">
+        <div class="notes">
+          <h3>7 天实验法（可直接执行）</h3>
+          <ul>
+            <li>Day1：抽取 30~100 条真实 query，建立基线（一次完成率/回合数/成本/误拦截）。</li>
+            <li>Day2-4：只改一个杠杆（如 query rewrite 或 permission 分级）。</li>
+            <li>Day5：回放同一批 query，看主指标是否提升且护栏不劣化。</li>
+            <li>Day6：沉淀失败样本库与规则修订单。</li>
+            <li>Day7：版本评审，只回答“哪个杠杆推动了目标函数”。</li>
+          </ul>
+          <h3 style="margin-top:12px;">验收口径</h3>
+          <ul>
+            <li>主指标：一次完成率上升。</li>
+            <li>护栏：误拦截率不升、单任务成本不升、平均回合数不升。</li>
+          </ul>
+        </div>
+        <div class="notes">
+          <h3>你可以直接拿去开会的模板</h3>
+          <ul>
+            <li>目标函数：成功率 / 效率 / 风险 / 成本。</li>
+            <li>杠杆映射：Prompt / Runtime / ToolRoute / Governance / Cost。</li>
+            <li>实验设计：样本、对照、观察窗、验收阈值。</li>
+            <li>外环治理：parity 差距表 + Top3 排期。</li>
+          </ul>
+          <div class="kpi">
+            <div><strong>主指标</strong><br/>一次完成率</div>
+            <div><strong>护栏1</strong><br/>误拦截率</div>
+            <div><strong>护栏2</strong><br/>单任务成本</div>
+            <div><strong>护栏3</strong><br/>平均回合数</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="part-5-lab">
+      <h2>5. 实战 Lab：真实 Query 与改写策略</h2>
+      <div class="module-card">
+        <h3>5.1 离线可复现实验（已验证）</h3>
+        <div class="flow-line">
+          <span class="arch-node">Rust system-prompt</span><span class="arch-arrow">-></span>
+          <span class="arch-node">Python route/bootstrap</span><span class="arch-arrow">-></span>
+          <span class="arch-node">中文 query 前后改写对比</span>
+        </div>
+        <div class="small-note">示例对比：原始中文 query 与补充能力词后的 query 在命中模块上会出现明显变化（例如更聚焦 conversation/hooks/permissions）。</div>
+      </div>
+      <div class="module-card" style="margin-top:12px;">
+        <h3>5.2 Query Rewrite 规则（PM 版）</h3>
+        <div class="module-split">
+          <div class="module-main">
+            <h4>规则</h4>
+            <ul>
+              <li>保留用户原句，不覆盖，只追加能力词。</li>
+              <li>能力词来自“目标函数杠杆”而非同义词堆砌。</li>
+              <li>命中失败时触发二次改写兜底。</li>
+            </ul>
+            <h4>目标</h4>
+            <ul><li>提升一次完成率，不增加成本/回合/误拦截。</li></ul>
+          </div>
+          <aside class="module-side">
+            <h4>建议先追 3 个指标</h4>
+            <ul>
+              <li>中文 query 首次命中率。</li>
+              <li>0 命中后二次改写挽救率。</li>
+              <li>改写后误命中率（命中但无业务价值）。</li>
+            </ul>
+          </aside>
+        </div>
+      </div>
+      <div class="source">
+        复现实验命令建议：<code>cargo run ... system-prompt</code>、<code>python3 -m src.main route "..."</code>、<code>python3 -m src.main bootstrap "..."</code>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
